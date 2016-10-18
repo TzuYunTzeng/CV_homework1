@@ -33,7 +33,7 @@ function output = my_imfilter(image, filter)
 %%%%%%%%%%%%%%%%
 % Your code here
 %%%%%%%%%%%%%%%%
-pad = 'zero';
+%pad = 'zero';
 im = im2double(image);
 [my,mx,mz] = size(image);
 [fy,fx] = size(filter);
@@ -55,12 +55,16 @@ pad_x = floor(fx/2);
 pad_y = floor(fy/2);
 im = padarray(im,[pad_y,pad_x]);
 output = zeros(my,mx);
-filter =
+%{
 for x = 1:mx,
     for y = 1:my,
-        output(y,x,:) = sum(sum(im(y:y+2*pad_y,x:x+2*pad_x,:).*filter));
+        for z = 1:mz,
+            output(y,x,z) = sum(sum(im(y:y+2*pad_y,x:x+2*pad_x,z).*filter));
+        end
     end
 end
+%}
+
         
 
 

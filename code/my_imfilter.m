@@ -35,6 +35,7 @@ function output = my_imfilter(image, filter)
 %%%%%%%%%%%%%%%%
 %pad = 'zero';
 im = im2double(image);
+%if length(size(image))==2
 [my,mx,mz] = size(image);
 [fy,fx] = size(filter);
 
@@ -55,10 +56,7 @@ pad_x = floor(fx/2);
 pad_y = floor(fy/2);
 im = padarray(im,[pad_y,pad_x]);
 output = zeros(my,mx);
-% filter2 = zeros(fy,fx,3);
-% filter2(:,:,1) = filter;
-% filter2(:,:,2) = filter;
-% filter2(:,:,3) = filter;
+%{
 for x = 1:mx,
     for y = 1:my,
         for z = 1:mz,
@@ -66,6 +64,8 @@ for x = 1:mx,
         end
     end
 end
+%}
+for x=1:fx
         
 
 
