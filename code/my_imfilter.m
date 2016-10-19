@@ -44,20 +44,8 @@ elseif length(size(image))==3
 end
 [fy,fx] = size(filter);
 
-%flip
-%{
-filter2 = zeros(fy,fx);
-for x = 1:fx,
-    for y=1:fy,
-        filter2(y,x) = filter(fy-y+1,fx-x+1);
-    end
-end
-filter = filter2;
-%}
-
 pad_x = floor(fx/2);
 pad_y = floor(fy/2);
-%im = padarray(im,[pad_y,pad_x]);
 
 if isgray==1
     output = zeros(size(im)+[2*pad_y 2*pad_x]);
@@ -79,22 +67,3 @@ else
     output = output(1+pad_y:end-pad_y,1+pad_x:end-pad_x,:);
 end
         
-%{
-for x = 1:mx,
-    for y = 1:my,
-        for z = 1:mz,
-            output(y,x,z) = sum(sum(im(y:y+2*pad_y,x:x+2*pad_x,z).*filter));
-        end
-    end
-end
-%}
-        
-
-
-
-
-
-
-
-
-

@@ -10,8 +10,8 @@ close all; % closes all figures
 
 %% Setup
 % read images and convert to floating point format
-image1 = im2single(imread('../data/plane.bmp'));
-image2 = im2single(imread('../data/bird.bmp'));
+image1 = im2single(imread('../data/H.jpg'));
+image2 = im2single(imread('../data/T.jpg'));
 
 %image1 = im2single(imread('../data/dog.bmp'));
 %image2 = im2single(imread('../data/cat.bmp'));
@@ -61,7 +61,8 @@ figure(1); imshow(low_frequencies)
 figure(2); imshow(high_frequencies + 0.5);
 vis = vis_hybrid_image(hybrid_image);
 figure(3); imshow(vis);
-imwrite(low_frequencies, 'low_frequencies.jpg', 'quality', 95);
-imwrite(high_frequencies + 0.5, 'high_frequencies.jpg', 'quality', 95);
-imwrite(hybrid_image, 'hybrid_image.jpg', 'quality', 95);
-imwrite(vis, 'hybrid_image_scales.jpg', 'quality', 95);
+name = '_H_T';
+imwrite(low_frequencies, ['../pic/low_frequencies' name '.jpg'], 'quality', 95);
+imwrite(high_frequencies + 0.5, ['../pic/high_frequencies' name '.jpg'], 'quality', 95);
+imwrite(hybrid_image, ['../pic/hybrid_image' name '.jpg'], 'quality', 95);
+imwrite(vis, ['../pic/hybrid_image_scales' name '.jpg'], 'quality', 95);
