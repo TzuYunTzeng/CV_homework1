@@ -9,41 +9,50 @@
 
 ## Implementation
 * **my_imfilter:**
-	1. Use im2double to change the type of each pixel from uint8 to double and save the size of input image and filter.
+	1. Use im2double to change the type of each pixel from uint8 to double and save the size of input image and filter. Moreover, distinguish gray scale image and color image from its dimension
 		```
 		im = im2double(image);
-	[my,mx,mz] = size(image);
-	[fy,fx] = size(filter);
+		isgray =0;
+		if length(size(image))==2    
+    			isgray=1;
+		elseif length(size(image))==3
+    			[~,~,mz]=size(image);
+    			isgray=0;
+		end
 		``` 
 	
-	2. According to the convolution operation, we need to rotate the filter 180 degree and then do the multiply and sum (Although there is no difference here, gaussian filter is symmetric to its center.) Hence, we flip the filter. 
+	2. Save the size of the filter and decide how many pixel we need to pad:
 		```
-		filter2 = zeros(fy,fx);
-	for x = 1:fx,
-    		for y=1:fy,
-        		filter2(y,x) = filter(fy-y+1,fx-x+1);
-    		end
-	end
-	filter = filter2;
-		```
-	
-	3. As teacher mentioned in the class, when performing convolution on the edge of the image, the filter kernel would exceed the boundary(unless you use 1 * 1 filter). As a result, we should perform padding on  the edge of the image to avoid this condition. For example, we are supposed to pad 1 pixel width on the edge if we use 3 * 3 filter. 
-		```
+		[fy,fx] = size(filter);
+
 		pad_x = floor(fx/2);
-	pad_y = floor(fy/2);
-	im = padarray(im,[pad_y,pad_x]);
+		pad_y = floor(fy/2);
 		```
 	
-	4. In the end, we perform convolution to the whole image. I simply treat the filter as a sliding window and move it through every index. If we can simplify the 3 for loop structure, the operation might become faster.
+	3. Take gray scale image as example. Instead of shifting the filter all over the image, we fix the filter and move the image. In this case, if we have a filter which is much smaller than the image (like 3 * 3), we can save much shift and dot operation:
 		```
-		output = zeros(my,mx);
-	for x = 1:mx,
-    		for y = 1:my,
-        		for z = 1:mz,
-            		output(y,x,z) = sum(sum(im(y:y+2*pad_y,x:x+2*pad_x,z).*filter));
-       			end
+		if isgray==1
+    			output = zeros(size(im)+[2*pad_y 2*pad_x]);
+    			for x= 1:fx,
+        			for y=1:fy,
+            				output(y:end-(fy-y),x:end-(fx-x))=output(y:end-(fy-y),x:end-(fx-x))+im*filter(y,x);
+        			end
+    			end
+    			output = output(1+pad_y:end-pad_y,1+pad_x:end-pad_x);
+		...
+		```
+	
+	4. In the color image case, we only need to further take channel into consideration and perform the same task as we do in the gray scale case:
+		```
+		output = zeros(size(im)+[2*pad_y 2*pad_x 0]);
+    		for x= 1:fx,
+        		for y=1:fy,
+            			for z=1:mz,
+                			output(y:end-(fy-y),x:end-(fx-x),z)=output(y:end-(fy-y),x:end-(fx-x),z)+im(:,:,z)*filter(y,x);
+            			end
+        		end
     		end
-	end
+    		output = output(1+pad_y:end-pad_y,1+pad_x:end-pad_x,:);
 		```
 	
 * **proj1:**
@@ -84,28 +93,126 @@ imwrite(vis, 'hybrid_image_scales.jpg', 'quality', 95);
 	
 
 ## Installation
-* Other required packages.
-* How to compile from source?
+* Only need matlab (use relatively new version is good choice)
+* How to run the code:
+
+```
+git clone https://github.com/brade31919/homework1
+cd HOMEWORK1ROOT/code/
+proj1 #run proj1
+```
 
 ### Results
 
-<table border=1>
+* Hybrid image  
+
+<table border=1>  
+<em>Cat & Dog </em>
 <tr>
 <td>
-<img src="placeholder.jpg" width="24%"/>
-<img src="placeholder.jpg"  width="24%"/>
-<img src="placeholder.jpg" width="24%"/>
-<img src="placeholder.jpg" width="24%"/>
+<em>-----------low-frequency dog---------------------high-frequency cat--------------------------hybrid image----------------</em><br>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/low_frequencies_cat_dog.jpg" width="32%"/>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/high_frequencies_cat_dog.jpg" width="32%"/>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/hybrid_image_cat_dog.jpg" width="32%"/>
 </td>
 </tr>
 
 <tr>
 <td>
-<img src="placeholder.jpg" width="24%"/>
-<img src="placeholder.jpg"  width="24%"/>
-<img src="placeholder.jpg" width="24%"/>
-<img src="placeholder.jpg" width="24%"/>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/hybrid_image_scales_cat_dog.jpg" width="99%"/>
 </td>
 </tr>
-
 </table>
+
+
+<table border=1>  
+<em>Einstein & Marilyn </em>
+<tr>
+<td>
+<em>--------low-frequency Marilyn-----------high-frequency Einstein------------------hybrid image----------</em><br>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/low_frequencies_E_M.jpg" width="32%"/>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/high_frequencies_E_M.jpg" width="32%"/>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/hybrid_image_E_M.jpg" width="32%"/>
+</td>
+</tr>
+
+<tr>
+<td>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/hybrid_image_scales_E_M.jpg" width="99%"/>
+</td>
+</tr>
+</table>
+
+<table border=1>  
+<em>Bird & Plane </em>
+<tr>
+<td>
+<em>------------low-frequency bird-------------------high-frequency plane----------------------hybrid image----------------</em><br>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/low_frequencies_bird_plane.jpg" width="32%"/>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/high_frequencies_bird_plane.jpg" width="32%"/>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/hybrid_image_bird_plane.jpg" width="32%"/>
+</td>
+</tr>
+
+<tr>
+<td>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/hybrid_image_scales_bird_plane.jpg" width="99%"/>
+</td>
+</tr>
+</table>
+
+<table border=1>  
+<em>Bike & Motocycle </em>
+<tr>
+<td>
+<em>---------low-frequency bike------------------high-frequency motorcycle---------------------hybrid image----------------</em><br>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/low_frequencies_bicycle_motorcycle.jpg" width="32%"/>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/high_frequencies_bicycle_motorcycle.jpg" width="32%"/>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/hybrid_image_bicycle_motorcycle.jpg" width="32%"/>
+</td>
+</tr>
+
+<tr>
+<td>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/hybrid_image_scales_bicycle_motorcycle.jpg" width="99%"/>
+</td>
+</tr>
+</table>
+
+<table border=1>  
+<em>Fish & Submarine </em>
+<tr>
+<td>
+<em>------------low-frequency submarine------------------high-frequency fish------------------hybrid image----------------</em><br>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/low_frequencies_submarine_fish.jpg" width="32%"/>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/high_frequencies_submarine_fish.jpg" width="32%"/>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/hybrid_image_submarine_fish.jpg" width="32%"/>
+</td>
+</tr>
+
+<tr>
+<td>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/hybrid_image_scales_submarine_fish.jpg" width="99%"/>
+</td>
+</tr>
+</table>
+
+
+<table border=1>  
+<em>Hilary & Trump </em>
+<tr>
+<td>
+<em>------------low-frequency Hilary------------------high-frequency Trump------------------hybrid image----------------</em><br>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/low_frequencies_H_T.jpg" width="32%"/>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/high_frequencies_H_T.jpg" width="32%"/>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/hybrid_image_H_T.jpg" width="32%"/>
+</td>
+</tr>
+
+<tr>
+<td>
+<img src="https://github.com/brade31919/homework1/blob/master/pic/hybrid_image_scales_H_T.jpg" width="99%"/>
+</td>
+</tr>
+</table>
+
